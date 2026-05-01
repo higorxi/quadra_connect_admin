@@ -231,6 +231,13 @@
     "@eslint/core" "^0.17.0"
     levn "^0.4.1"
 
+"@hookform/resolvers@^5.2.2":
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-5.2.2.tgz#5ac16cd89501ca31671e6e9f0f5c5d762a99aa12"
+  integrity sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==
+  dependencies:
+    "@standard-schema/utils" "^0.3.0"
+
 "@humanfs/core@^0.19.2":
   version "0.19.2"
   resolved "https://registry.yarnpkg.com/@humanfs/core/-/core-0.19.2.tgz#a8272ca03b2acf492670222b2320b6c421bfde60"
@@ -396,6 +403,11 @@
   version "1.0.0-rc.7"
   resolved "https://registry.yarnpkg.com/@rolldown/pluginutils/-/pluginutils-1.0.0-rc.7.tgz#0414869467f0e471a6515d4f506c85fde867e022"
   integrity sha512-qujRfC8sFVInYSPPMLQByRh7zhwkGFS4+tyMQ83srV1qrxL4g8E2tyxVVyxd0+8QeBM1mIk9KbWxkegRr76XzA==
+
+"@standard-schema/utils@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@standard-schema/utils/-/utils-0.3.0.tgz#3d5e608f16c2390c10528e98e59aef6bf73cae7b"
+  integrity sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==
 
 "@tybys/wasm-util@^0.10.1":
   version "0.10.1"
@@ -1363,6 +1375,11 @@ react-dom@^19.2.4:
   dependencies:
     scheduler "^0.27.0"
 
+react-hook-form@^7.74.0:
+  version "7.74.0"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.74.0.tgz#7c55ac360290e7e7a78cc3169b0f07bce11a36c0"
+  integrity sha512-yR6wHr99p9wFv686jhRWVSFhUvDvNbdUf2dKlbno8/VKOCuoNobDGC6S+M2dua9A9Yo8vpcrp8assIYbsZCQ9g==
+
 react-router-dom@^7.14.2:
   version "7.14.2"
   resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-7.14.2.tgz#0b043c1534fe58596771b82a318a7e4c2e5f1279"
@@ -1565,3 +1582,8 @@ yocto-queue@^0.1.0:
   version "4.3.6"
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.3.6.tgz#89c56e0aa7d2b05107d894412227087885ab112a"
   integrity sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==
+
+zod@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-4.4.1.tgz#3c9bcf62b846273c7c8056d5b698bbae19db1d8b"
+  integrity sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==
