@@ -12,6 +12,10 @@ export function AppRoutes() {
 
   return (
     <Routes>
+      <Route 
+        path="/" 
+        element={<Navigate to={signed ? appPaths.dashboard() : appPaths.login()} replace />} 
+      />
       <Route path={appPaths.login()} element={!signed ? <Login /> : <Navigate to={appPaths.dashboard()} />} />
 
       <Route element={signed ? <DefaultLayout /> : <Navigate to={appPaths.login()} />}>
