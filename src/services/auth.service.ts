@@ -2,7 +2,7 @@ import { apiRoutes } from '../constants/api-routes';
 import { api } from './api';
 
 interface LoginResponse {
-  token: string;
+  accessToken: string;
   user: {
     id: string;
     name: string;

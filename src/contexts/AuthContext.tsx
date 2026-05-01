@@ -5,7 +5,7 @@ import { api } from '../services/api';
 interface AuthContextType {
   signed: boolean;
   user: object | null;
-  signIn: (credentials: object) => Promise<void>;
+  signIn: (credentials: LoginParams) => Promise<void>;
   signOut: () => void;
 }
 
@@ -26,8 +26,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const response = await AuthService.login({ email: credentials.email, password: credentials.password });
     
     setUser(response.user);
-    AuthService.setAccessToken(response.token);
-    api.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
+    AuthService.setAccessToken(response.accessToken);
+    api.defaults.headers.common['Authorization'] = `Bearer ${response.accessToken}`;
   }
 
   function signOut() {
