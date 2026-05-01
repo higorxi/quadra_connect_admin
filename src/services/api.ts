@@ -26,9 +26,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
+    const isLoginRequest = error.config.url?.includes('/login') || error.config.url?.includes('/auth');
 
-    if (status === 401) {
-      // Logout automático se o token expirar
+    if (status === 401 && !isLoginRequest) {
       localStorage.removeItem('@QuadraConnect:token');
       window.location.href = '/login';
     }

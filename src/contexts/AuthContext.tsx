@@ -25,11 +25,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   async function signIn(credentials: LoginParams) {
-    const response = await AuthService.login({ email: credentials.email, password: credentials.password });
-    
-    setUser(response.user);
-    AuthService.setAccessToken(response.accessToken);
-    api.defaults.headers.common['Authorization'] = `Bearer ${response.accessToken}`;
+    try {
+      const response = await AuthService.login(credentials);
+  
+      AuthService.setAccessToken(response.accessToken);
+      api.defaults.headers.common['Authorization'] = `Bearer ${response.accessToken}`;
+  
+      setUser(response.user);
+      
+    } catch (error) {
+      console.error("Erro no login:", error);
+      throw error;
+    }
   }
 
   function signOut() {
