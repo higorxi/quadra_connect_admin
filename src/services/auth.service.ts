@@ -32,9 +32,15 @@ const logout = async (): Promise<void> => {
   localStorage.removeItem('@QuadraConnect:token');
 };
 
+const getCurrentUser = async (token: string): Promise<LoginResponse> => {
+  const response = await api.get<LoginResponse>(apiRoutes.auth.me);
+  return response.data;
+};
+
 export const AuthService = {
   login,
   setAccessToken,
   getAccessToken,
   logout,
+  getCurrentUser
 };

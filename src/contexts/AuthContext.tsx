@@ -16,9 +16,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const storagedToken = AuthService.getAccessToken();
-    if (storagedToken) {
+    if (storagedToken && typeof storagedToken === 'string') {
       api.defaults.headers.common['Authorization'] = `Bearer ${storagedToken}`;
-      setUser({ name: 'Higor' });
+      AuthService.getCurrentUser(storagedToken).then((user) => {
+        setUser(user);
+      });
     }
   }, []);
 
