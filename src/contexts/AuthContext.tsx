@@ -4,22 +4,31 @@ import { api } from '../services/api';
 
 interface AuthContextType {
   signed: boolean;
-  user: object | null;
+  user: UserAuthenticated | null;
   signIn: (credentials: LoginParams) => Promise<void>;
   signOut: () => void;
+}
+
+export interface UserAuthenticated {
+  id: string;
+  email: string;
+  role: 'LOCATOR' | 'CUSTOMER';
+  profileType: 'ADMIN' | 'USER';
+  companyId: string | null;
+  customerId: string | null;
 }
 
 export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<object | null>(null);
+  const [user, setUser] = useState<UserAuthenticated | null>(null);
 
   useEffect(() => {
     const storagedToken = AuthService.getAccessToken();
     if (storagedToken && typeof storagedToken === 'string') {
       api.defaults.headers.common['Authorization'] = `Bearer ${storagedToken}`;
-      AuthService.getCurrentUser().then((user) => {
-        setUser(user);
+      AuthService.getCurrentUser().then((data) => {
+        setUser(data.user);
       });
     }
   }, []);
@@ -40,6 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   function signOut() {
+    alert(`fazendo logout`)
     AuthService.logout();
     setUser(null);
   }

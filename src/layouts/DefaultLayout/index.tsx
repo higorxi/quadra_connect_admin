@@ -76,7 +76,7 @@ export function DefaultLayout() {
               Visão Geral
             </Text>
             <Text color="navy.500" fontSize="lg" fontWeight="semibold">
-              Olá, {(user as any)?.name} 👋
+              Olá, {user.email} 👋
             </Text>
           </Box>
 

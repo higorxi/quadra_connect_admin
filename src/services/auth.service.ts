@@ -1,13 +1,10 @@
+import type { UserAuthenticated } from '@/contexts/AuthContext';
 import { apiRoutes } from '../constants/api-routes';
 import { api } from './api';
 
 interface LoginResponse {
   accessToken: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  user: UserAuthenticated;
 }
 
 export interface LoginParams {
