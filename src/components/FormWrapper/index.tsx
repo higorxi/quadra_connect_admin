@@ -5,7 +5,7 @@ import type { ZodType } from "zod";
 import { VStack, Button, Box } from "@chakra-ui/react";
 
 interface FormWrapperProps<T extends FieldValues> {
-  schema: ZodType<T>;
+  schema: ZodType<T, any, any>;
   defaultValues?: DefaultValues<T>;
   onSubmit: (data: T) => void | Promise<void>;
   children: (methods: UseFormReturn<T>) => ReactNode;
@@ -22,14 +22,14 @@ export function FormWrapper<T extends FieldValues>({
   buttonLabel = "Salvar",
 }: FormWrapperProps<T>) {
   const methods = useForm<T>({
-    resolver: zodResolver(schema) as unknown as Resolver<T>,
+    resolver: zodResolver(schema), 
     defaultValues,
   });
 
   return (
     <Box as="form" onSubmit={methods.handleSubmit(onSubmit)} width="full">
       <VStack gap={5} align="stretch">
-        {children(methods as unknown as UseFormReturn<T>)}
+        {children(methods)}
 
         <Button
           type="submit"

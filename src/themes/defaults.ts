@@ -89,6 +89,6 @@ const customConfig = defineConfig({
       },
     },
   },
-})
+} as any)
 
 export const system = createSystem(defaultConfig, customConfig)
