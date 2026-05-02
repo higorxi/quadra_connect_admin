@@ -11,7 +11,6 @@ interface PageContainerProps {
 export const PageContainer = ({ title, description, rightElement, children }: PageContainerProps) => {
   return (
     <Flex direction="column" minH="100%" gap={6}>
-      {/* Header da Página */}
       <Flex justify="space-between" align="flex-end">
         <VStack align="start" gap={1}>
           <Heading size="2xl" color="navy.500" letterSpacing="tight">
@@ -27,7 +26,6 @@ export const PageContainer = ({ title, description, rightElement, children }: Pa
         {rightElement && <Box>{rightElement}</Box>}
       </Flex>
 
-      {/* Conteúdo Variável */}
       <Box flex={1}>
         {children}
       </Box>

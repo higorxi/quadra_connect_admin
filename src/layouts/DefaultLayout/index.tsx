@@ -76,7 +76,7 @@ export function DefaultLayout() {
               Visão Geral
             </Text>
             <Text color="navy.500" fontSize="lg" fontWeight="semibold">
-              Olá, {user.email} 👋
+              Olá, {user?.email} 👋
             </Text>
           </Box>
 
@@ -96,8 +96,7 @@ export function DefaultLayout() {
             </Flex>
           </Flex>
         </Flex>
-
-        {/* Área de Conteúdo com Scroll */}
+        
         <Box p={8} overflowY="auto" flex={1}>
           <Outlet />
         </Box>
