@@ -8,6 +8,10 @@ import { NotFound } from '../pages/404';
 import { appPaths } from '../constants/app-paths';
 import Unidades from '@/pages/Unidades';
 import Reservas from '@/pages/Reservas';
+import Reviews from '@/pages/Reviews';
+import Relatorios from '@/pages/Relatorios';
+import Perfil from '@/pages/Perfil';
+import Transacoes from '@/pages/Transacoes';
 
 export function AppRoutes() {
   const { signed } = useContext(AuthContext);
@@ -24,6 +28,10 @@ export function AppRoutes() {
         <Route path={appPaths.dashboard()} element={<Dashboard />} />
         <Route path={appPaths.unidades()} element={<Unidades />} />
         <Route path={appPaths.reservas()} element={<Reservas />} />
+        <Route path={appPaths.reviews()} element={<Reviews />} />
+        <Route path={appPaths.transacoes()} element={<Transacoes />} />
+        <Route path={appPaths.relatorios()} element={<Relatorios />} />
+        <Route path={appPaths.perfil()} element={<Perfil />} />
       </Route>
 
       <Route path="*" element={<Navigate to={signed ? appPaths.dashboard() : appPaths.notFound()} />} />

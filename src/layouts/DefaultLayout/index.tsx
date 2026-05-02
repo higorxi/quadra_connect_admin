@@ -13,7 +13,7 @@ import {
   Circle,
   Image
 } from "@chakra-ui/react";
-import { FiGrid, FiMapPin, FiLogOut, FiUser, FiBell, FiCalendar } from "react-icons/fi";
+import { FiGrid, FiMapPin, FiLogOut, FiUser, FiBell, FiCalendar, FiBarChart, FiCreditCard, FiStar } from "react-icons/fi";
 import { SidebarLink } from './components/SideBarLink';
 
 export function DefaultLayout() {
@@ -41,6 +41,10 @@ export function DefaultLayout() {
           <SidebarLink to={appPaths.dashboard()} icon={<FiGrid />} label="Dashboard" />
           <SidebarLink to={appPaths.unidades()} icon={<FiMapPin />} label="Unidades" />
           <SidebarLink to={appPaths.reservas()} icon={<FiCalendar />} label="Reservas" />
+          <SidebarLink to={appPaths.reviews()} icon={<FiStar />} label="Avaliações" />
+          <SidebarLink to={appPaths.transacoes()} icon={<FiCreditCard />} label="Transações" />
+          <SidebarLink to={appPaths.relatorios()} icon={<FiBarChart />} label="Relatórios" />
+          <SidebarLink to={appPaths.perfil()} icon={<FiUser />} label="Perfil" />
         </VStack>
 
         <Box mt="auto">

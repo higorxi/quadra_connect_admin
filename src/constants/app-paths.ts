@@ -4,10 +4,9 @@ export const appPaths = {
     unidades: (): string => '/unidades',
     quadras: (): string => '/quadras',
     reservas: (): string => '/reservas',
-    usuarios: (): string => '/usuarios',
+    reviews: (): string => '/reviews',
+    transacoes: (): string => '/transacoes',
     relatorios: (): string => '/relatorios',
-    configuracoes: (): string => '/configuracoes',
-    ajuda: (): string => '/ajuda',
-    sobre: (): string => '/sobre',
+    perfil: (): string => '/perfil',
     notFound: (): string => '/404',
 }
