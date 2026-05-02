@@ -6,6 +6,8 @@ import { Login } from '../pages/Login';
 import { Dashboard } from '../pages/Dashboard';
 import { NotFound } from '../pages/404';
 import { appPaths } from '../constants/app-paths';
+import Unidades from '@/pages/Unidades';
+import Reservas from '@/pages/Reservas';
 
 export function AppRoutes() {
   const { signed } = useContext(AuthContext);
@@ -20,14 +22,8 @@ export function AppRoutes() {
 
       <Route element={signed ? <DefaultLayout /> : <Navigate to={appPaths.login()} />}>
         <Route path={appPaths.dashboard()} element={<Dashboard />} />
-        {/* <Route path="/unidades" element={<Unidades />} />
-        <Route path="/quadras" element={<Quadras />} />
-        <Route path="/reservas" element={<Reservas />} />
-        <Route path="/usuarios" element={<Usuarios />} />
-        <Route path="/relatorios" element={<Relatorios />} />
-        <Route path="/configuracoes" element={<Configuracoes />} />
-        <Route path="/ajuda" element={<Ajuda />} />
-        <Route path="/sobre" element={<Sobre />} /> */}
+        <Route path={appPaths.unidades()} element={<Unidades />} />
+        <Route path={appPaths.reservas()} element={<Reservas />} />
       </Route>
 
       <Route path="*" element={<Navigate to={signed ? appPaths.dashboard() : appPaths.notFound()} />} />
