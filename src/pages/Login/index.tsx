@@ -35,17 +35,17 @@ export function Login() {
       
       <AuthCarousel />
 
-      <Center bg="bg.panel" p={8}>
+      <Center bg="background" p={8}>
         <VStack 
           as="form" 
           onSubmit={handleSubmit(onSubmit)} 
           gap="8" 
           w="full" 
-          maxW="350px" 
+          maxW="450px" 
           align="stretch"
         >
           <VStack align="start" gap="1">
-            <Heading size="3xl">Admin Login</Heading>
+            <Heading size="3xl">Quadra Connect Business</Heading>
             <Box color="fg.muted">Bem-vindo de volta!</Box>
           </VStack>
 
@@ -78,7 +78,6 @@ export function Login() {
 
           <Button 
             type="submit" 
-            variant="outline"
             colorPalette="blue" 
             size="lg" 
             width="full"

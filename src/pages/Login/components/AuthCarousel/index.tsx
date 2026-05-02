@@ -6,8 +6,10 @@ const AuthCarousel = () => {
     const [index, setIndex] = useState(0);
 
     const images = [
-        "https://playpiso.com.br/wp-content/uploads/2021/09/quadras-esportivas-1-playpiso.png",
-        "https://www.jmarinhoprojetos.com.br/blog/doutor/uploads/0/blog/2024/12/blog-melhores-projetos-de-quadras-poliesportivas-5a9e1924f2.png",
+        'src/assets/images/login/login_wallpaper_1.png',
+        'src/assets/images/login/login_wallpaper_2.png',
+        'src/assets/images/login/login_wallpaper_3.png',
+        'src/assets/images/login/login_wallpaper_4.png',
     ] as const;
 
     useEffect(() => {
