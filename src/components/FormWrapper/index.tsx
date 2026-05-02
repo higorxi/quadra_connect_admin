@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useForm, type UseFormReturn, type FieldValues, type DefaultValues, type Resolver } from "react-hook-form";
+import { useForm, type UseFormReturn, type FieldValues, type DefaultValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ZodType } from "zod";
 import { VStack, Button, Box } from "@chakra-ui/react";
