@@ -13,7 +13,7 @@ export interface UserAuthenticated {
   id: string;
   email: string;
   role: 'LOCATOR' | 'CUSTOMER';
-  profileType: 'ADMIN' | 'USER';
+  profileType: 'COMPANY' | 'CUSTOMER';
   companyId: string | null;
   customerId: string | null;
 }

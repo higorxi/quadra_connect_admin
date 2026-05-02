@@ -1,16 +1,50 @@
+import { useState } from "react";
 import { ContentBlock } from "@/components/ContentBlock";
 import { PageContainer } from "@/components/PageContainer";
-import { Button, SimpleGrid, Text, Box } from "@chakra-ui/react";
+import { FormWrapper } from "@/components/FormWrapper";
+import { UnitFields } from "@/pages/Unidades/components/UnitFields";
+import { CreateUnitSchema, type CreateUnitDTO } from "@/schemas/services/units.dto.schema";
+import { UnitsService } from "@/services/units.service";
+import {
+  Button,
+  SimpleGrid,
+  Text,
+  Box,
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogBody,
+  DialogCloseTrigger,
+  useDisclosure
+} from "@chakra-ui/react";
 import { FiPlus } from "react-icons/fi";
-
+import { apiRoutes } from "@/constants/api-routes";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Unidades() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { open, onOpen, onClose } = useDisclosure();
+  const queryClient = useQueryClient();
+  
+  const handleCreateUnit = async (data: CreateUnitDTO) => {
+    setIsSubmitting(true);
+    try {
+      await UnitsService.createUnit(data);
+      queryClient.invalidateQueries({ queryKey: [apiRoutes.units.list] });
+      onClose();
+    } catch (error) {
+      console.error("Erro ao criar unidade:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <PageContainer 
       title="Gestão de Unidades" 
       description="Visualize e gerencie todas as suas quadras e espaços."
       rightElement={
-        <Button gap={2}>
+        <Button gap={2} colorPalette="primary" onClick={onOpen}>
           <FiPlus /> Nova Unidade
         </Button>
       }
@@ -26,6 +60,23 @@ export default function Unidades() {
            </Box>
         </ContentBlock>
       </SimpleGrid>
+
+      <DialogRoot open={open} onOpenChange={onClose} size="lg">
+        <DialogContent>
+          <DialogHeader>Cadastrar Nova Unidade</DialogHeader>
+          <DialogCloseTrigger />
+          <DialogBody pb={6}>
+            <FormWrapper
+              schema={CreateUnitSchema}
+              onSubmit={handleCreateUnit}
+              isLoading={isSubmitting}
+              buttonLabel="Criar Unidade"
+            >
+              {(methods) => <UnitFields methods={methods} />}
+            </FormWrapper>
+          </DialogBody>
+        </DialogContent>
+      </DialogRoot>
     </PageContainer>
   );
 }

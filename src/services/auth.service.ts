@@ -13,7 +13,7 @@ export interface LoginParams {
 }
 
 const login = async (credentials: LoginParams): Promise<LoginResponse> => {
-  const response = await api.post<LoginResponse>(apiRoutes.auth.login, credentials);
+  const response = await api.post<LoginResponse>(apiRoutes.auth.login(), credentials);
   return response.data;
 };
 
@@ -30,7 +30,7 @@ const logout = async (): Promise<void> => {
 };
 
 const getCurrentUser = async (): Promise<LoginResponse> => {
-  const response = await api.get<LoginResponse>(apiRoutes.auth.me);
+  const response = await api.get<LoginResponse>(apiRoutes.auth.me());
   return response.data;
 };
 
