@@ -1,19 +1,62 @@
+import { createListCollection, SimpleGrid, Input, Textarea } from "@chakra-ui/react";
 import type { UseFormReturn } from "react-hook-form";
 import type { CreateUnitDTO } from "@/schemas/services/units.dto.schema";
 import { Field } from "@/components/ui/field";
-import { Input, SimpleGrid, Textarea } from "@chakra-ui/react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useCategories } from "@/hooks/useCategories";
+import {
+  SelectContent,
+  SelectItem,
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText,
+} from "@/components/ui/select";
 
 interface UnitFieldsProps {
   methods: UseFormReturn<CreateUnitDTO>;
 }
 
 export function UnitFields({ methods }: UnitFieldsProps) {
-  const { register, formState: { errors } } = methods;
+  const { register, formState: { errors }, setValue, watch } = methods;
+  const { categories, isLoading } = useCategories();
+
+  const categoryIdValue = watch("categoryId");
+
+  const collection = createListCollection({
+    items: categories || [],
+    itemToString: (item) => item.name,
+    itemToValue: (item) => item.id,
+  });
 
   return (
     <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
       <Field 
+        label="Categoria da Unidade" 
+        invalid={!!errors.categoryId} 
+        errorText={errors.categoryId?.message}
+        gridColumn="span 2"
+      >
+        <SelectRoot
+          collection={collection}
+          value={categoryIdValue ? [categoryIdValue] : []}
+          onValueChange={(e) => setValue("categoryId", e.value[0], { shouldValidate: true })}
+          disabled={isLoading}
+        >
+          <SelectTrigger>
+            <SelectValueText placeholder={isLoading ? "Carregando..." : "Selecione a categoria"} />
+          </SelectTrigger>
+          <SelectContent portalRef={undefined}>
+            {collection.items.map((cat) => (
+              <SelectItem item={cat} key={cat.id}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </SelectRoot>
+      </Field>
+
+      <Field 
+      required
         label="Nome da Unidade" 
         invalid={!!errors.name} 
         errorText={errors.name?.message}
@@ -28,7 +71,7 @@ export function UnitFields({ methods }: UnitFieldsProps) {
         errorText={errors.description?.message}
         gridColumn="span 2"
       >
-        <Textarea {...register("description")} placeholder="Detalhes sobre o espaço..." />
+        <Textarea {...register("description")} placeholder="Opcional" />
       </Field>
 
       <Field 
@@ -40,42 +83,25 @@ export function UnitFields({ methods }: UnitFieldsProps) {
         <Input {...register("address")} />
       </Field>
 
-      <Field 
-        label="Cidade" 
-        invalid={!!errors.city} 
-        errorText={errors.city?.message}
-      >
+      <Field label="Cidade" invalid={!!errors.city} errorText={errors.city?.message}>
         <Input {...register("city")} />
       </Field>
 
-      <Field 
-        label="UF (Estado)" 
-        invalid={!!errors.state} 
-        errorText={errors.state?.message}
-      >
+      <Field label="Estado (UF)" invalid={!!errors.state} errorText={errors.state?.message}>
         <Input {...register("state")} maxLength={2} />
       </Field>
 
-      <Field 
-        label="Preço por Hora" 
-        invalid={!!errors.pricePerHour} 
-        errorText={errors.pricePerHour?.message}
-      >
+      <Field label="Preço por Hora" invalid={!!errors.pricePerHour} errorText={errors.pricePerHour?.message}>
         <Input {...register("pricePerHour")} type="text" />
       </Field>
 
-      <Field 
-        label="Valor do Caução (Opcional)" 
-        invalid={!!errors.bailValue} 
-        errorText={errors.bailValue?.message}
-      >
-        <Input {...register("bailValue")} type="text" />
+      <Field label="Caução" invalid={!!errors.bailValue} errorText={errors.bailValue?.message}>
+        <Input {...register("bailValue")} placeholder="Opcional" />
       </Field>
 
       <Checkbox 
-        {...register("requiresConfirmation")}
-        alignItems="center"
-        paddingTop={4}
+        {...register("requiresConfirmation")} 
+        paddingY={2}
       >
         Requer confirmação manual?
       </Checkbox>

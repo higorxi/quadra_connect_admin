@@ -1,5 +1,5 @@
 import { PageContainer } from "@/components/PageContainer";
-import { DataCard } from "@/components/ui/DataCard";
+import { DataCard } from "@/components/DataCard";
 import { SimpleGrid } from "@chakra-ui/react";
 import { FiClock, FiDollarSign, FiStar, FiCheckCircle } from "react-icons/fi";
 

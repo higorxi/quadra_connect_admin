@@ -11,4 +11,8 @@ export const apiRoutes = {
     update: (id: string | number) => `/units/${id}`,
     get: (id: string | number) => `/units/${id}`,
   },
+  categories: {
+    list: () => '/categories',
+    get: (id: string | number) => `/categories/${id}`,
+  },
 } as const;
