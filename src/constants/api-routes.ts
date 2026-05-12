@@ -18,4 +18,19 @@ export const apiRoutes = {
   companies: {
     me: () => '/companies/me',
   },
+  reservations: {
+    company: () => '/reservations/company',
+    get: (id: string | number) => `/reservations/${id}`,
+    update: (id: string | number) => `/reservations/${id}`,
+  },
+  reviews: {
+    byReservation: (reservationId: string | number) => `/reviews/reservation/${reservationId}`,
+  },
+  statistics: {
+    company: () => '/statistics/company',
+  },
+  transactions: {
+    get: (id: string | number) => `/transactions/${id}`,
+    updateStatus: (id: string | number) => `/transactions/${id}/status`,
+  },
 } as const;

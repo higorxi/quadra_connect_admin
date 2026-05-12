@@ -1,20 +1,15 @@
 import { ContentBlock } from "@/components/ContentBlock";
 import { PageContainer } from "@/components/PageContainer";
-import { Button } from "@chakra-ui/react";
-import { FiEdit } from "react-icons/fi";
+import { UnderConstruction } from "@/components/UnderConstruction";
 
 export default function Transacoes() {
     return (
         <PageContainer
             title="Transações"
-            rightElement={
-                <Button>
-                    <FiEdit />
-                </Button>
-            }
+            description="Área financeira aguardando contrato de listagem por empresa."
         >
             <ContentBlock title="Transações">
-                <h1>Transações</h1>
+                <UnderConstruction description="O backend ainda precisa expor GET /transactions/company e relacionar transações com reserva ou empresa antes desta listagem ser liberada no admin." />
             </ContentBlock>
         </PageContainer>
     );

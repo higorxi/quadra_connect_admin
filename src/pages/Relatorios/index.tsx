@@ -1,20 +1,15 @@
 import { ContentBlock } from "@/components/ContentBlock";
 import { PageContainer } from "@/components/PageContainer";
-import { Button } from "@chakra-ui/react";
-import { FiEdit } from "react-icons/fi";
+import { UnderConstruction } from "@/components/UnderConstruction";
 
 export default function Relatorios() {
     return (
         <PageContainer
             title="Relatórios"
-            rightElement={
-                <Button>
-                    <FiEdit />
-                </Button>
-            }
+            description="Indicadores consolidados dependem dos endpoints de filtros e financeiro."
         >
             <ContentBlock title="Relatórios">
-                <h1>Relatórios</h1>
+                <UnderConstruction description="Esta área ficará em construção até existirem filtros/paginação de reservas e listagem financeira por empresa para consolidar receitas e desempenho." />
             </ContentBlock>
         </PageContainer>
     );

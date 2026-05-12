@@ -12,9 +12,18 @@ import Reviews from '@/pages/Reviews';
 import Relatorios from '@/pages/Relatorios';
 import Perfil from '@/pages/Perfil';
 import Transacoes from '@/pages/Transacoes';
+import { Center, Spinner } from '@chakra-ui/react';
 
 export function AppRoutes() {
-  const { signed } = useContext(AuthContext);
+  const { signed, isLoadingSession } = useContext(AuthContext);
+
+  if (isLoadingSession) {
+    return (
+      <Center minH="100vh" bg="#F4F7FE">
+        <Spinner size="xl" color="brand.500" />
+      </Center>
+    );
+  }
 
   return (
     <Routes>

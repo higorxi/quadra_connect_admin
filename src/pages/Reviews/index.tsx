@@ -1,20 +1,15 @@
 import { ContentBlock } from "@/components/ContentBlock";
-import { Button } from "@chakra-ui/react";
 import { PageContainer } from "@/components/PageContainer";
-import { FiEdit } from "react-icons/fi";
+import { UnderConstruction } from "@/components/UnderConstruction";
 
 export default function Reviews() {
     return (
         <PageContainer
-            title="Reviews"
-            rightElement={
-                <Button>
-                    <FiEdit />
-                </Button>
-            }
+            title="Avaliações"
+            description="Avaliações aparecem nos detalhes da reserva enquanto a listagem geral não existe."
         >
-            <ContentBlock title="Reviews">
-                <h1>Reviews</h1>
+            <ContentBlock title="Avaliações">
+                <UnderConstruction description="Hoje existe apenas GET /reviews/reservation/:reservationId. Para esta tela dedicada, falta o endpoint de listagem da empresa, como GET /reviews/company." />
             </ContentBlock>
         </PageContainer>
     );
