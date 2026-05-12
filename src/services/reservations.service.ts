@@ -1,12 +1,6 @@
 import { apiRoutes } from "@/constants/api-routes";
+import type { ReservationStatus } from "@/enums/reservation-status";
 import { api } from "./api";
-
-export type ReservationStatus =
-  | "PENDING"
-  | "CONFIRMED"
-  | "REJECTED"
-  | "CANCELLED"
-  | "COMPLETED";
 
 export interface ReservationSummary {
   id: string;

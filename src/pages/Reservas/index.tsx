@@ -1,12 +1,15 @@
 import { BaseModal } from "@/components/ui/BaseModal";
 import { ContentBlock } from "@/components/ContentBlock";
 import { PageContainer } from "@/components/PageContainer";
+import { ReservationStatus, type ReservationStatus as ReservationStatusType } from "@/enums/reservation-status";
 import { ReviewsService } from "@/services/reviews.service";
+import { ReservationsService, type ReservationSummary } from "@/services/reservations.service";
+import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import {
-  ReservationsService,
-  type ReservationStatus,
-  type ReservationSummary,
-} from "@/services/reservations.service";
+  formatReservationStatus,
+  inactiveReservationStatuses,
+  reservationStatusColors,
+} from "@/utils/reservation-status";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Badge,
@@ -25,36 +28,6 @@ import {
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { FiCheck, FiEye, FiFlag, FiRefreshCw, FiShield, FiX } from "react-icons/fi";
-
-const statusLabels: Record<ReservationStatus, string> = {
-  PENDING: "Pendente",
-  CONFIRMED: "Confirmada",
-  REJECTED: "Rejeitada",
-  CANCELLED: "Cancelada",
-  COMPLETED: "Concluída",
-};
-
-const statusColors: Record<ReservationStatus, string> = {
-  PENDING: "orange",
-  CONFIRMED: "green",
-  REJECTED: "red",
-  CANCELLED: "gray",
-  COMPLETED: "blue",
-};
-
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
-
-function formatCurrency(value: string) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(Number(value));
-}
 
 export default function Reservas() {
   const queryClient = useQueryClient();
@@ -86,7 +59,7 @@ export default function Reservas() {
       bailPaid,
     }: {
       id: string;
-      status?: ReservationStatus;
+      status?: ReservationStatusType;
       bailPaid?: boolean;
     }) => ReservationsService.updateReservation(id, { status, bailPaid }),
     onSuccess: (_, variables) => {
@@ -102,9 +75,9 @@ export default function Reservas() {
     const items = reservations ?? [];
     return {
       total: items.length,
-      pending: items.filter((reservation) => reservation.status === "PENDING").length,
-      confirmed: items.filter((reservation) => reservation.status === "CONFIRMED").length,
-      completed: items.filter((reservation) => reservation.status === "COMPLETED").length,
+      pending: items.filter((reservation) => reservation.status === ReservationStatus.PENDING).length,
+      confirmed: items.filter((reservation) => reservation.status === ReservationStatus.CONFIRMED).length,
+      completed: items.filter((reservation) => reservation.status === ReservationStatus.COMPLETED).length,
     };
   }, [reservations]);
 
@@ -113,7 +86,7 @@ export default function Reservas() {
 
   function updateReservation(
     reservation: ReservationSummary,
-    data: { status?: ReservationStatus; bailPaid?: boolean }
+    data: { status?: ReservationStatusType; bailPaid?: boolean }
   ) {
     updateReservationMutation.mutate({ id: reservation.id, ...data });
   }
@@ -202,8 +175,8 @@ export default function Reservas() {
                         </Text>
                       </Table.Cell>
                       <Table.Cell>
-                        <Badge colorPalette={statusColors[reservation.status]} variant="subtle">
-                          {statusLabels[reservation.status]}
+                        <Badge colorPalette={reservationStatusColors[reservation.status]} variant="subtle">
+                          {formatReservationStatus(reservation.status)}
                         </Badge>
                       </Table.Cell>
                       <Table.Cell>
@@ -216,7 +189,7 @@ export default function Reservas() {
                       </Table.Cell>
                       <Table.Cell textAlign="end">
                         <Group gap={2} justifyContent="flex-end">
-                          {reservation.status === "PENDING" && (
+                          {reservation.status === ReservationStatus.PENDING && (
                             <>
                               <IconButton
                                 aria-label="Confirmar reserva"
@@ -224,7 +197,7 @@ export default function Reservas() {
                                 colorPalette="green"
                                 variant="ghost"
                                 loading={isUpdating}
-                                onClick={() => updateReservation(reservation, { status: "CONFIRMED" })}
+                                onClick={() => updateReservation(reservation, { status: ReservationStatus.CONFIRMED })}
                               >
                                 <FiCheck />
                               </IconButton>
@@ -234,7 +207,7 @@ export default function Reservas() {
                                 colorPalette="red"
                                 variant="ghost"
                                 loading={isUpdating}
-                                onClick={() => updateReservation(reservation, { status: "REJECTED" })}
+                                onClick={() => updateReservation(reservation, { status: ReservationStatus.REJECTED })}
                               >
                                 <FiX />
                               </IconButton>
@@ -279,21 +252,21 @@ export default function Reservas() {
         footer={
           activeReservation && (
             <HStack gap={3} justify="flex-end" w="full">
-              {activeReservation.status === "CONFIRMED" && (
+              {activeReservation.status === ReservationStatus.CONFIRMED && (
                 <Button
                   colorPalette="blue"
                   loading={isUpdating}
-                  onClick={() => updateReservation(activeReservation, { status: "COMPLETED" })}
+                  onClick={() => updateReservation(activeReservation, { status: ReservationStatus.COMPLETED })}
                 >
                   <FiFlag /> Concluir
                 </Button>
               )}
-              {!["CANCELLED", "COMPLETED", "REJECTED"].includes(activeReservation.status) && (
+              {!inactiveReservationStatuses.includes(activeReservation.status) && (
                 <Button
                   colorPalette="red"
                   variant="outline"
                   loading={isUpdating}
-                  onClick={() => updateReservation(activeReservation, { status: "CANCELLED" })}
+                  onClick={() => updateReservation(activeReservation, { status: ReservationStatus.CANCELLED })}
                 >
                   <FiX /> Cancelar
                 </Button>
@@ -310,7 +283,7 @@ export default function Reservas() {
           activeReservation && (
             <VStack align="stretch" gap={5}>
               <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-                <DetailItem label="Status" value={statusLabels[activeReservation.status]} />
+                <DetailItem label="Status" value={formatReservationStatus(activeReservation.status)} />
                 <DetailItem label="Total" value={formatCurrency(activeReservation.totalPrice)} />
                 <DetailItem label="Início" value={formatDateTime(activeReservation.startTime)} />
                 <DetailItem label="Fim" value={formatDateTime(activeReservation.endTime)} />
