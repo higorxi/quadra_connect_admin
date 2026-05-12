@@ -15,4 +15,7 @@ export const apiRoutes = {
     list: () => '/categories',
     get: (id: string | number) => `/categories/${id}`,
   },
+  companies: {
+    me: () => '/companies/me',
+  },
 } as const;
