@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UnitsService } from "@/services/units.service";
-import { apiRoutes } from "@/constants/api-routes";
 import type { CreateUnitDTO } from "@/schemas/services/units.dto.schema";
 
 export function useUnits() {
@@ -8,17 +7,17 @@ export function useUnits() {
 
   const { data: units, isLoading } = useQuery({
     queryKey: ["units"],
-    queryFn: UnitsService.getUnits,
+    queryFn: UnitsService.getMyUnits,
   });
 
   const createMutation = useMutation({
     mutationFn: UnitsService.createUnit,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [apiRoutes.units.list()] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["units"] }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: UnitsService.deleteUnit,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [apiRoutes.units.list()] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["units"] }),
   });
 
   const updateMutation = useMutation({

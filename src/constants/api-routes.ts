@@ -5,7 +5,7 @@ export const apiRoutes = {
     me: () => '/auth/me',
   },
   units: {
-    list: () => '/units',
+    my: () => '/units/mine',
     create: () => '/units',
     delete: (id: string | number) => `/units/${id}`,
     update: (id: string | number) => `/units/${id}`,
@@ -24,12 +24,14 @@ export const apiRoutes = {
     update: (id: string | number) => `/reservations/${id}`,
   },
   reviews: {
+    company: () => '/reviews/company',
     byReservation: (reservationId: string | number) => `/reviews/reservation/${reservationId}`,
   },
   statistics: {
     company: () => '/statistics/company',
   },
   transactions: {
+    company: () => '/transactions/company',
     get: (id: string | number) => `/transactions/${id}`,
     updateStatus: (id: string | number) => `/transactions/${id}/status`,
   },

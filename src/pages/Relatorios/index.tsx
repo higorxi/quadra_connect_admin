@@ -9,7 +9,7 @@ export default function Relatorios() {
             description="Indicadores consolidados dependem dos endpoints de filtros e financeiro."
         >
             <ContentBlock title="Relatórios">
-                <UnderConstruction description="Esta área ficará em construção até existirem filtros/paginação de reservas e listagem financeira por empresa para consolidar receitas e desempenho." />
+                <UnderConstruction description="Esta área ainda está em construção."/>
             </ContentBlock>
         </PageContainer>
     );

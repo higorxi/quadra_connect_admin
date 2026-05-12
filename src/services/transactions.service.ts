@@ -7,13 +7,20 @@ export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED";
 export interface TransactionSummary {
   id: string;
   customerId: string;
+  companyId: string | null;
+  reservationId: string | null;
   amount: string;
   type: TransactionType;
   status: TransactionStatus;
-  pixCode: string;
+  pixCode: string | null;
   createdAt: string;
   updatedAt: string;
 }
+
+const getCompanyTransactions = async (): Promise<TransactionSummary[]> => {
+  const response = await api.get<TransactionSummary[]>(apiRoutes.transactions.company());
+  return response.data;
+};
 
 const getTransaction = async (id: string): Promise<TransactionSummary> => {
   const response = await api.get<TransactionSummary>(apiRoutes.transactions.get(id));
@@ -31,6 +38,7 @@ const updateTransactionStatus = async (
 };
 
 export const TransactionsService = {
+  getCompanyTransactions,
   getTransaction,
   updateTransactionStatus,
 };

@@ -3,8 +3,8 @@ import { api } from "./api";
 import { apiRoutes } from "@/constants/api-routes";
 
 
-const getUnits = async (): Promise<Unit[]> => {
-  const response = await api.get(apiRoutes.units.list());
+const getMyUnits = async (): Promise<Unit[]> => {
+  const response = await api.get(apiRoutes.units.my());
   return response.data;
 };
 
@@ -30,7 +30,7 @@ const deleteUnit = async (id: string): Promise<void> => {
 };
 
 export const UnitsService = {
-  getUnits,
+  getMyUnits,
   getUnit,
   createUnit,
   updateUnit,

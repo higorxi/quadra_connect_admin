@@ -1,5 +1,6 @@
 import { BaseModal } from "@/components/ui/BaseModal";
 import { ContentBlock } from "@/components/ContentBlock";
+import { DetailItem } from "@/components/DetailItem";
 import { PageContainer } from "@/components/PageContainer";
 import { ReservationStatus, type ReservationStatus as ReservationStatusType } from "@/enums/reservation-status";
 import { ReviewsService } from "@/services/reviews.service";
@@ -7,7 +8,7 @@ import { ReservationsService, type ReservationSummary } from "@/services/reserva
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import {
   formatReservationStatus,
-  inactiveReservationStatuses,
+  isInactiveReservationStatus,
   reservationStatusColors,
 } from "@/utils/reservation-status";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -261,7 +262,7 @@ export default function Reservas() {
                   <FiFlag /> Concluir
                 </Button>
               )}
-              {!inactiveReservationStatuses.includes(activeReservation.status) && (
+              {!isInactiveReservationStatus(activeReservation.status) && (
                 <Button
                   colorPalette="red"
                   variant="outline"
@@ -330,19 +331,6 @@ function Metric({ label, value, tone = "gray" }: { label: string; value: number;
         {label}
       </Text>
       <Text fontSize="2xl" color={`${tone}.500`} fontWeight="bold">
-        {value}
-      </Text>
-    </Box>
-  );
-}
-
-function DetailItem({ label, value }: { label: string; value: string }) {
-  return (
-    <Box>
-      <Text fontSize="xs" color="gray.500" fontWeight="bold" textTransform="uppercase">
-        {label}
-      </Text>
-      <Text fontWeight="medium" wordBreak="break-word">
         {value}
       </Text>
     </Box>

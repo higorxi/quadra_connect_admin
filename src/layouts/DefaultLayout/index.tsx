@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { appPaths } from '../../constants/app-paths';
@@ -13,7 +13,7 @@ import {
   Circle,
   Image
 } from "@chakra-ui/react";
-import { FiGrid, FiMapPin, FiLogOut, FiUser, FiBell, FiCalendar, FiBarChart, FiCreditCard, FiStar } from "react-icons/fi";
+import { FiGrid, FiMapPin, FiLogOut, FiUser, FiCalendar, FiBarChart, FiCreditCard, FiStar } from "react-icons/fi";
 import { SidebarLink } from './components/SideBarLink';
 
 export function DefaultLayout() {
@@ -85,18 +85,16 @@ export function DefaultLayout() {
           </Box>
 
           <Flex align="center" gap={4}>
-            <Circle size="40px" bg="gray.50" color="gray.600" border="1px solid" borderColor="gray.200" cursor="pointer" _hover={{ bg: "gray.100" }}>
-              <FiBell size={18} />
-            </Circle>
-            <Separator orientation="vertical" h="30px" />
             <Flex align="center" gap={3}>
               <Box textAlign="right" display={{ base: "none", md: "block" }}>
                 <Text fontSize="sm" fontWeight="bold" color="navy.500">{(user as any)?.name}</Text>
                 <Text fontSize="xs" color="brand.600">Locador</Text>
               </Box>
-              <Circle size="45px" bg="brand.500" border="2px solid" borderColor="brand.100" color="white">
-                <FiUser size={24} />
-              </Circle>
+              <Link to={appPaths.perfil()}>
+                <Circle  size="45px" bg="brand.500" border="2px solid" borderColor="brand.100" color="white" _hover={{ bg: "brand.600" }}>
+                  <FiUser size={24} />
+                </Circle>
+              </Link>
             </Flex>
           </Flex>
         </Flex>
