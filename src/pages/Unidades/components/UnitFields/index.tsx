@@ -1,5 +1,5 @@
 import { createListCollection, SimpleGrid, Input, Textarea } from "@chakra-ui/react";
-import type { UseFormReturn } from "react-hook-form";
+import { Controller, type UseFormReturn } from "react-hook-form";
 import type { CreateUnitDTO } from "@/schemas/services/units.dto.schema";
 import { Field } from "@/components/ui/field";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,7 +17,7 @@ interface UnitFieldsProps {
 }
 
 export function UnitFields({ methods }: UnitFieldsProps) {
-  const { register, formState: { errors }, setValue, watch } = methods;
+  const { control, register, formState: { errors }, setValue, watch } = methods;
   const { categories, isLoading } = useCategories();
 
   const categoryIdValue = watch("categoryId");
@@ -31,6 +31,7 @@ export function UnitFields({ methods }: UnitFieldsProps) {
   return (
     <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
       <Field 
+        required
         label="Categoria da Unidade" 
         invalid={!!errors.categoryId} 
         errorText={errors.categoryId?.message}
@@ -56,7 +57,7 @@ export function UnitFields({ methods }: UnitFieldsProps) {
       </Field>
 
       <Field 
-      required
+        required
         label="Nome da Unidade" 
         invalid={!!errors.name} 
         errorText={errors.name?.message}
@@ -75,6 +76,7 @@ export function UnitFields({ methods }: UnitFieldsProps) {
       </Field>
 
       <Field 
+        required
         label="Endereço" 
         invalid={!!errors.address} 
         errorText={errors.address?.message}
@@ -83,15 +85,15 @@ export function UnitFields({ methods }: UnitFieldsProps) {
         <Input {...register("address")} />
       </Field>
 
-      <Field label="Cidade" invalid={!!errors.city} errorText={errors.city?.message}>
+      <Field required label="Cidade" invalid={!!errors.city} errorText={errors.city?.message}>
         <Input {...register("city")} />
       </Field>
 
-      <Field label="Estado (UF)" invalid={!!errors.state} errorText={errors.state?.message}>
+      <Field required label="Estado (UF)" invalid={!!errors.state} errorText={errors.state?.message}>
         <Input {...register("state")} maxLength={2} />
       </Field>
 
-      <Field label="Preço por Hora" invalid={!!errors.pricePerHour} errorText={errors.pricePerHour?.message}>
+      <Field required label="Preço por Hora" invalid={!!errors.pricePerHour} errorText={errors.pricePerHour?.message}>
         <Input {...register("pricePerHour")} type="text" />
       </Field>
 
@@ -99,12 +101,20 @@ export function UnitFields({ methods }: UnitFieldsProps) {
         <Input {...register("bailValue")} placeholder="Opcional" />
       </Field>
 
-      <Checkbox 
-        {...register("requiresConfirmation")} 
-        paddingY={2}
-      >
-        Requer confirmação manual?
-      </Checkbox>
+      <Controller
+        name="requiresConfirmation"
+        control={control}
+        defaultValue={false}
+        render={({ field }) => (
+          <Checkbox
+            checked={!!field.value}
+            onCheckedChange={(details) => field.onChange(!!details.checked)}
+            paddingY={2}
+          >
+            Requer confirmação manual?
+          </Checkbox>
+        )}
+      />
     </SimpleGrid>
   );
 }

@@ -58,3 +58,7 @@ export function getFinishedReservationStatusTotal(statisticsStatus: Record<strin
     0
   );
 }
+
+export function isInactiveReservationStatus(status: ReservationStatusType) {
+  return inactiveReservationStatuses.some((inactiveStatus) => inactiveStatus === status);
+}
