@@ -16,14 +16,14 @@ export const ContentBlock = ({
 }: ContentBlockProps) => {
   return (
     <Box 
-      bg={{ base: "white", _dark: "navy.600" }} 
-      color={{ base: "inherit", _dark: "white" }}
+      bg="white"
+      color="navy.500"
       p={6} 
       borderRadius="xl" 
       shadow="sm" 
       borderWidth="1px"
       borderStyle="solid"
-      borderColor={{ base: "gray.100", _dark: "transparent" }}
+      borderColor="gray.100"
       h="full"
       flex={flex}
       display="flex"
@@ -32,7 +32,7 @@ export const ContentBlock = ({
       <Flex justify="space-between" align="center" mb={6}>
         <Heading 
           size="md" 
-          color={{ base: "navy.500", _dark: "white" }}
+          color="navy.500"
           fontWeight="bold"
           letterSpacing="tight"
         >
@@ -41,7 +41,7 @@ export const ContentBlock = ({
         
         {badge && (
           <Badge 
-            colorPalette={{ base: "green", _dark: "blue" }} 
+            colorPalette="green"
             variant="subtle"
             px={2}
             borderRadius="md"
