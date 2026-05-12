@@ -294,7 +294,7 @@ export default function Reservas() {
               </SimpleGrid>
 
               <Box borderTop="1px solid" borderColor="gray.100" pt={4}>
-                <Text fontWeight="bold" color="navy.500" mb={3}>
+                <Text fontWeight="bold" mb={3}>
                   Avaliação do cliente
                 </Text>
                 {isLoadingReview && <Text color="gray.500">Buscando avaliação...</Text>}
@@ -342,7 +342,7 @@ function DetailItem({ label, value }: { label: string; value: string }) {
       <Text fontSize="xs" color="gray.500" fontWeight="bold" textTransform="uppercase">
         {label}
       </Text>
-      <Text color="navy.500" fontWeight="medium" wordBreak="break-word">
+      <Text fontWeight="medium" wordBreak="break-word">
         {value}
       </Text>
     </Box>
