@@ -1,7 +1,12 @@
 import { ContentBlock } from "@/components/ContentBlock";
+import { DataTable, type DataTableColumn } from "@/components/DataTable";
 import { DetailItem } from "@/components/DetailItem";
+import { MetricCard } from "@/components/MetricCard";
 import { PageContainer } from "@/components/PageContainer";
 import { BaseModal } from "@/components/ui/BaseModal";
+import { EntityLink } from "@/components/EntityLink";
+import { detailPath } from "@/utils/detail-path";
+import { appPaths } from "@/constants/app-paths";
 import { ReviewsService, type CompanyReviewSummary } from "@/services/reviews.service";
 import { formatDateTime } from "@/utils/formatters";
 import { formatReservationStatus, reservationStatusColors } from "@/utils/reservation-status";
@@ -10,11 +15,8 @@ import {
   Badge,
   Box,
   Button,
-  Center,
   IconButton,
   SimpleGrid,
-  Spinner,
-  Table,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -42,6 +44,85 @@ export default function Reviews() {
     };
   }, [reviews]);
 
+  const columns: DataTableColumn<CompanyReviewSummary>[] = [
+    {
+      key: "createdAt",
+      header: "Data",
+      cell: (review) => (
+        <>
+          <Text fontWeight="semibold" color="navy.600">
+            {formatDateTime(review.createdAt)}
+          </Text>
+          <Text fontSize="xs" color="gray.500">
+            atualizada {formatDateTime(review.updatedAt)}
+          </Text>
+        </>
+      ),
+    },
+    {
+      key: "unit",
+      header: "Unidade",
+      cell: (review) => (
+        <EntityLink
+          to={detailPath(appPaths.unidades(), review.unitId)}
+          label={review.unit.name}
+        />
+      ),
+    },
+    {
+      key: "period",
+      header: "Período",
+      cell: (review) => (
+        <>
+          <Text fontSize="sm" color="gray.700">
+            {formatDateTime(review.reservation.startTime)}
+          </Text>
+          <Text fontSize="xs" color="gray.500">
+            até {formatDateTime(review.reservation.endTime)}
+          </Text>
+        </>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (review) => (
+        <Badge colorPalette={reservationStatusColors[review.reservation.status]} variant="subtle">
+          {formatReservationStatus(review.reservation.status)}
+        </Badge>
+      ),
+    },
+    {
+      key: "rating",
+      header: "Nota",
+      cell: (review) => <Text fontWeight="semibold">{review.rating}/10</Text>,
+    },
+    {
+      key: "comment",
+      header: "Comentário",
+      cell: (review) => (
+        <Text fontSize="sm" color="gray.700" lineClamp={1}>
+          {review.comment || "Sem comentário"}
+        </Text>
+      ),
+    },
+    {
+      key: "actions",
+      header: "Ações",
+      align: "end",
+      cell: (review) => (
+        <IconButton
+          aria-label="Ver detalhes da avaliação"
+          size="sm"
+          variant="ghost"
+          onClick={() => setSelectedReview(review)}
+        >
+          <FiEye />
+        </IconButton>
+      ),
+    },
+  ];
+
   return (
     <PageContainer
       title="Avaliações"
@@ -54,109 +135,24 @@ export default function Reviews() {
     >
       <VStack align="stretch" gap={6}>
         <SimpleGrid columns={{ base: 1, md: 4 }} gap={4}>
-          <Metric label="Total" value={String(metrics.total)} />
-          <Metric label="Média" value={metrics.averageRating.toFixed(1)} tone="blue" />
-          <Metric label="Notas 8+" value={String(metrics.highRatings)} tone="green" />
-          <Metric label="Com comentário" value={String(metrics.withComment)} tone="purple" />
+          <MetricCard label="Total" value={metrics.total} />
+          <MetricCard label="Média" value={metrics.averageRating.toFixed(1)} tone="blue" />
+          <MetricCard label="Notas 8+" value={metrics.highRatings} tone="green" />
+          <MetricCard label="Com comentário" value={metrics.withComment} tone="purple" />
         </SimpleGrid>
 
         <ContentBlock title="Avaliações da empresa">
-          {isLoading && (
-            <Center h="240px">
-              <VStack gap={4}>
-                <Spinner size="xl" color="brand.500" />
-                <Text color="gray.500">Carregando avaliações...</Text>
-              </VStack>
-            </Center>
-          )}
-
-          {isError && (
-            <Center h="220px" border="2px dashed" borderColor="red.200" borderRadius="md">
-              <VStack gap={3}>
-                <Text color="" fontWeight="semibold">
-                  Não foi possível carregar as avaliações.
-                </Text>
-                <Button size="sm" onClick={() => refetch()}>
-                  Tentar novamente
-                </Button>
-              </VStack>
-            </Center>
-          )}
-
-          {!isLoading && !isError && (!reviews || reviews.length === 0) && (
-            <Center h="220px" border="2px dashed" borderColor="gray.200" borderRadius="md">
-              <Text color="gray.400">Nenhuma avaliação encontrada.</Text>
-            </Center>
-          )}
-
-          {!isLoading && !isError && reviews && reviews.length > 0 && (
-            <Box overflowX="auto" borderRadius="md" border="1px solid" borderColor="gray.100">
-              <Table.Root variant="line" size="sm">
-                <Table.Header bg="gray.50">
-                  <Table.Row>
-                    <Table.ColumnHeader>Data</Table.ColumnHeader>
-                    <Table.ColumnHeader>Unidade</Table.ColumnHeader>
-                    <Table.ColumnHeader>Período</Table.ColumnHeader>
-                    <Table.ColumnHeader>Status</Table.ColumnHeader>
-                    <Table.ColumnHeader>Nota</Table.ColumnHeader>
-                    <Table.ColumnHeader>Comentário</Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="end">Ações</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-
-                <Table.Body>
-                  {reviews.map((review) => (
-                    <Table.Row key={review.id} bg="white" _hover={{ bg: "gray.50" }}>
-                      <Table.Cell>
-                        <Text fontWeight="semibold" color="navy.600">
-                          {formatDateTime(review.createdAt)}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500">
-                          atualizada {formatDateTime(review.updatedAt)}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontSize="sm" color="gray.700" lineClamp={1}>
-                          {review.unit.name}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontSize="sm" color="gray.700">
-                          {formatDateTime(review.reservation.startTime)}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500">
-                          até {formatDateTime(review.reservation.endTime)}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge colorPalette={reservationStatusColors[review.reservation.status]} variant="subtle">
-                          {formatReservationStatus(review.reservation.status)}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontWeight="semibold">{review.rating}/10</Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontSize="sm" color="gray.700" lineClamp={1}>
-                          {review.comment || "Sem comentário"}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell textAlign="end">
-                        <IconButton
-                          aria-label="Ver detalhes da avaliação"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setSelectedReview(review)}
-                        >
-                          <FiEye />
-                        </IconButton>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
-            </Box>
-          )}
+          <DataTable
+            columns={columns}
+            rows={reviews}
+            rowKey={(review) => review.id}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={() => refetch()}
+            loadingMessage="Carregando avaliações..."
+            emptyMessage="Nenhuma avaliação encontrada."
+            errorMessage="Não foi possível carregar as avaliações."
+          />
         </ContentBlock>
       </VStack>
 
@@ -175,8 +171,24 @@ export default function Reviews() {
               <DetailItem label="Criada em" value={formatDateTime(selectedReview.createdAt)} />
               <DetailItem label="Início" value={formatDateTime(selectedReview.reservation.startTime)} />
               <DetailItem label="Fim" value={formatDateTime(selectedReview.reservation.endTime)} />
-              <DetailItem label="Reserva" value={selectedReview.reservationId} />
-              <DetailItem label="Unidade ID" value={selectedReview.unitId} />
+              <DetailItem
+                label="Reserva"
+                value={
+                  <EntityLink
+                    to={detailPath(appPaths.reservas(), selectedReview.reservationId)}
+                    label={`Reserva de ${formatDateTime(selectedReview.reservation.startTime)}`}
+                  />
+                }
+              />
+              <DetailItem
+                label="Abrir unidade"
+                value={
+                  <EntityLink
+                    to={detailPath(appPaths.unidades(), selectedReview.unitId)}
+                    label={selectedReview.unit.name}
+                  />
+                }
+              />
             </SimpleGrid>
 
             <Box borderTop="1px solid" borderColor="gray.100" pt={4}>
@@ -191,18 +203,5 @@ export default function Reviews() {
         )}
       </BaseModal>
     </PageContainer>
-  );
-}
-
-function Metric({ label, value, tone = "gray" }: { label: string; value: string; tone?: string }) {
-  return (
-    <Box bg="white" borderRadius="xl" border="1px solid" borderColor="gray.100" p={5}>
-      <Text fontSize="xs" color="gray.500" fontWeight="bold" textTransform="uppercase">
-        {label}
-      </Text>
-      <Text fontSize="2xl" color={`${tone}.500`} fontWeight="bold">
-        {value}
-      </Text>
-    </Box>
   );
 }

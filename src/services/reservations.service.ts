@@ -5,7 +5,9 @@ import { api } from "./api";
 export interface ReservationSummary {
   id: string;
   customerId: string;
+  customerName: string | null;
   unitId: string;
+  unitName: string | null;
   startTime: string;
   endTime: string;
   status: ReservationStatus;

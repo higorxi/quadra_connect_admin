@@ -30,6 +30,11 @@ export const apiRoutes = {
   statistics: {
     company: () => '/statistics/company',
   },
+  reports: {
+    list: () => '/reports',
+    create: () => '/reports',
+    get: (id: string | number) => `/reports/${id}`,
+  },
   transactions: {
     company: () => '/transactions/company',
     get: (id: string | number) => `/transactions/${id}`,

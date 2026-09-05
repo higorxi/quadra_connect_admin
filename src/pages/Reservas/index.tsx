@@ -1,6 +1,11 @@
 import { BaseModal } from "@/components/ui/BaseModal";
+import { EntityLink } from "@/components/EntityLink";
+import { detailPath } from "@/utils/detail-path";
+import { appPaths } from "@/constants/app-paths";
 import { ContentBlock } from "@/components/ContentBlock";
+import { DataTable, type DataTableColumn } from "@/components/DataTable";
 import { DetailItem } from "@/components/DetailItem";
+import { MetricCard } from "@/components/MetricCard";
 import { PageContainer } from "@/components/PageContainer";
 import { ReservationStatus, type ReservationStatus as ReservationStatusType } from "@/enums/reservation-status";
 import { ReviewsService } from "@/services/reviews.service";
@@ -23,23 +28,32 @@ import {
   IconButton,
   SimpleGrid,
   Spinner,
-  Table,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FiCheck, FiEye, FiFlag, FiRefreshCw, FiShield, FiX } from "react-icons/fi";
 
 export default function Reservas() {
   const queryClient = useQueryClient();
   const [selectedReservation, setSelectedReservation] = useState<ReservationSummary | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const { data: reservations, isLoading, isError, refetch } = useQuery({
     queryKey: ["reservations", "company"],
     queryFn: ReservationsService.getCompanyReservations,
   });
 
-  const selectedReservationId = selectedReservation?.id;
+  const selectedReservationId = selectedReservation?.id ?? searchParams.get("detalhe") ?? undefined;
+
+  const closeDetails = () => {
+    setSelectedReservation(null);
+    if (searchParams.has("detalhe")) {
+      searchParams.delete("detalhe");
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
 
   const { data: reservationDetails, isLoading: isLoadingDetails } = useQuery({
     queryKey: ["reservations", selectedReservationId],
@@ -92,6 +106,119 @@ export default function Reservas() {
     updateReservationMutation.mutate({ id: reservation.id, ...data });
   }
 
+  const columns: DataTableColumn<ReservationSummary>[] = [
+    {
+      key: "period",
+      header: "Período",
+      cell: (reservation) => (
+        <>
+          <Text fontWeight="semibold" color="navy.600">
+            {formatDateTime(reservation.startTime)}
+          </Text>
+          <Text fontSize="xs" color="gray.500">
+            até {formatDateTime(reservation.endTime)}
+          </Text>
+        </>
+      ),
+    },
+    {
+      key: "unitId",
+      header: "Unidade",
+      cell: (reservation) => (
+        <EntityLink
+          to={detailPath(appPaths.unidades(), reservation.unitId)}
+          label={reservation.unitName}
+          fallback={reservation.unitId}
+        />
+      ),
+    },
+    {
+      key: "customerId",
+      header: "Cliente",
+      cell: (reservation) => (
+        <Text fontSize="sm" color="gray.700" lineClamp={1}>
+          {reservation.customerName ?? reservation.customerId}
+        </Text>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (reservation) => (
+        <Badge colorPalette={reservationStatusColors[reservation.status]} variant="subtle">
+          {formatReservationStatus(reservation.status)}
+        </Badge>
+      ),
+    },
+    {
+      key: "bailPaid",
+      header: "Caução",
+      cell: (reservation) => (
+        <Badge colorPalette={reservation.bailPaid ? "green" : "gray"} variant="subtle">
+          {reservation.bailPaid ? "Paga" : "Pendente"}
+        </Badge>
+      ),
+    },
+    {
+      key: "totalPrice",
+      header: "Total",
+      cell: (reservation) => <Text fontWeight="semibold">{formatCurrency(reservation.totalPrice)}</Text>,
+    },
+    {
+      key: "actions",
+      header: "Ações",
+      align: "end",
+      cell: (reservation) => (
+        <Group gap={2} justifyContent="flex-end">
+          {reservation.status === ReservationStatus.PENDING && (
+            <>
+              <IconButton
+                aria-label="Confirmar reserva"
+                size="sm"
+                colorPalette="green"
+                variant="ghost"
+                loading={isUpdating}
+                onClick={() => updateReservation(reservation, { status: ReservationStatus.CONFIRMED })}
+              >
+                <FiCheck />
+              </IconButton>
+              <IconButton
+                aria-label="Rejeitar reserva"
+                size="sm"
+                colorPalette="red"
+                variant="ghost"
+                loading={isUpdating}
+                onClick={() => updateReservation(reservation, { status: ReservationStatus.REJECTED })}
+              >
+                <FiX />
+              </IconButton>
+            </>
+          )}
+          {!reservation.bailPaid && (
+            <IconButton
+              aria-label="Marcar caução como paga"
+              size="sm"
+              colorPalette="blue"
+              variant="ghost"
+              loading={isUpdating}
+              onClick={() => updateReservation(reservation, { bailPaid: true })}
+            >
+              <FiShield />
+            </IconButton>
+          )}
+          <IconButton
+            aria-label="Ver detalhes da reserva"
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelectedReservation(reservation)}
+          >
+            <FiEye />
+          </IconButton>
+        </Group>
+      ),
+    },
+  ];
+
   return (
     <PageContainer
       title="Gestão de Reservas"
@@ -104,150 +231,30 @@ export default function Reservas() {
     >
       <VStack align="stretch" gap={6}>
         <SimpleGrid columns={{ base: 1, md: 4 }} gap={4}>
-          <Metric label="Total" value={metrics.total} />
-          <Metric label="Pendentes" value={metrics.pending} tone="orange" />
-          <Metric label="Confirmadas" value={metrics.confirmed} tone="green" />
-          <Metric label="Concluídas" value={metrics.completed} tone="blue" />
+          <MetricCard label="Total" value={metrics.total} />
+          <MetricCard label="Pendentes" value={metrics.pending} tone="orange" />
+          <MetricCard label="Confirmadas" value={metrics.confirmed} tone="green" />
+          <MetricCard label="Concluídas" value={metrics.completed} tone="blue" />
         </SimpleGrid>
 
         <ContentBlock title="Reservas da empresa">
-          {isLoading && (
-            <Center h="240px">
-              <VStack gap={4}>
-                <Spinner size="xl" color="brand.500" />
-                <Text color="gray.500">Carregando reservas...</Text>
-              </VStack>
-            </Center>
-          )}
-
-          {isError && (
-            <Center h="220px" border="2px dashed" borderColor="red.200" borderRadius="md">
-              <VStack gap={3}>
-                <Text color="red.500" fontWeight="semibold">
-                  Não foi possível carregar as reservas.
-                </Text>
-                <Button size="sm" onClick={() => refetch()}>
-                  Tentar novamente
-                </Button>
-              </VStack>
-            </Center>
-          )}
-
-          {!isLoading && !isError && (!reservations || reservations.length === 0) && (
-            <Center h="220px" border="2px dashed" borderColor="gray.200" borderRadius="md">
-              <Text color="gray.400">Nenhuma reserva encontrada.</Text>
-            </Center>
-          )}
-
-          {!isLoading && !isError && reservations && reservations.length > 0 && (
-            <Box overflowX="auto" borderRadius="md" border="1px solid" borderColor="gray.100">
-              <Table.Root variant="line" size="sm">
-                <Table.Header bg="gray.50">
-                  <Table.Row>
-                    <Table.ColumnHeader>Período</Table.ColumnHeader>
-                    <Table.ColumnHeader>Unidade</Table.ColumnHeader>
-                    <Table.ColumnHeader>Cliente</Table.ColumnHeader>
-                    <Table.ColumnHeader>Status</Table.ColumnHeader>
-                    <Table.ColumnHeader>Caução</Table.ColumnHeader>
-                    <Table.ColumnHeader>Total</Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="end">Ações</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-
-                <Table.Body>
-                  {reservations.map((reservation) => (
-                    <Table.Row key={reservation.id} bg="white" _hover={{ bg: "gray.50" }}>
-                      <Table.Cell>
-                        <Text fontWeight="semibold" color="navy.600">
-                          {formatDateTime(reservation.startTime)}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500">
-                          até {formatDateTime(reservation.endTime)}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontSize="sm" color="gray.700" lineClamp={1}>
-                          {reservation.unitId}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontSize="sm" color="gray.700" lineClamp={1}>
-                          {reservation.customerId}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge colorPalette={reservationStatusColors[reservation.status]} variant="subtle">
-                          {formatReservationStatus(reservation.status)}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge colorPalette={reservation.bailPaid ? "green" : "gray"} variant="subtle">
-                          {reservation.bailPaid ? "Paga" : "Pendente"}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontWeight="semibold">{formatCurrency(reservation.totalPrice)}</Text>
-                      </Table.Cell>
-                      <Table.Cell textAlign="end">
-                        <Group gap={2} justifyContent="flex-end">
-                          {reservation.status === ReservationStatus.PENDING && (
-                            <>
-                              <IconButton
-                                aria-label="Confirmar reserva"
-                                size="sm"
-                                colorPalette="green"
-                                variant="ghost"
-                                loading={isUpdating}
-                                onClick={() => updateReservation(reservation, { status: ReservationStatus.CONFIRMED })}
-                              >
-                                <FiCheck />
-                              </IconButton>
-                              <IconButton
-                                aria-label="Rejeitar reserva"
-                                size="sm"
-                                colorPalette="red"
-                                variant="ghost"
-                                loading={isUpdating}
-                                onClick={() => updateReservation(reservation, { status: ReservationStatus.REJECTED })}
-                              >
-                                <FiX />
-                              </IconButton>
-                            </>
-                          )}
-                          {!reservation.bailPaid && (
-                            <IconButton
-                              aria-label="Marcar caução como paga"
-                              size="sm"
-                              colorPalette="blue"
-                              variant="ghost"
-                              loading={isUpdating}
-                              onClick={() => updateReservation(reservation, { bailPaid: true })}
-                            >
-                              <FiShield />
-                            </IconButton>
-                          )}
-                          <IconButton
-                            aria-label="Ver detalhes da reserva"
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setSelectedReservation(reservation)}
-                          >
-                            <FiEye />
-                          </IconButton>
-                        </Group>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
-            </Box>
-          )}
+          <DataTable
+            columns={columns}
+            rows={reservations}
+            rowKey={(reservation) => reservation.id}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={() => refetch()}
+            loadingMessage="Carregando reservas..."
+            emptyMessage="Nenhuma reserva encontrada."
+            errorMessage="Não foi possível carregar as reservas."
+          />
         </ContentBlock>
       </VStack>
 
       <BaseModal
-        isOpen={!!selectedReservation}
-        onClose={() => setSelectedReservation(null)}
+        isOpen={!!selectedReservationId}
+        onClose={closeDetails}
         title="Detalhes da reserva"
         size="lg"
         footer={
@@ -288,8 +295,20 @@ export default function Reservas() {
                 <DetailItem label="Total" value={formatCurrency(activeReservation.totalPrice)} />
                 <DetailItem label="Início" value={formatDateTime(activeReservation.startTime)} />
                 <DetailItem label="Fim" value={formatDateTime(activeReservation.endTime)} />
-                <DetailItem label="Unidade" value={activeReservation.unitId} />
-                <DetailItem label="Cliente" value={activeReservation.customerId} />
+                <DetailItem
+                  label="Unidade"
+                  value={
+                    <EntityLink
+                      to={detailPath(appPaths.unidades(), activeReservation.unitId)}
+                      label={activeReservation.unitName}
+                      fallback={activeReservation.unitId}
+                    />
+                  }
+                />
+                <DetailItem
+                  label="Cliente"
+                  value={activeReservation.customerName ?? activeReservation.customerId}
+                />
                 <DetailItem label="Caução" value={activeReservation.bailPaid ? "Paga" : "Pendente"} />
                 <DetailItem label="Reserva dividida" value={activeReservation.isSplit ? "Sim" : "Não"} />
               </SimpleGrid>
@@ -321,18 +340,5 @@ export default function Reservas() {
         )}
       </BaseModal>
     </PageContainer>
-  );
-}
-
-function Metric({ label, value, tone = "gray" }: { label: string; value: number; tone?: string }) {
-  return (
-    <Box bg="white" borderRadius="xl" border="1px solid" borderColor="gray.100" p={5}>
-      <Text fontSize="xs" color="gray.500" fontWeight="bold" textTransform="uppercase">
-        {label}
-      </Text>
-      <Text fontSize="2xl" color={`${tone}.500`} fontWeight="bold">
-        {value}
-      </Text>
-    </Box>
   );
 }

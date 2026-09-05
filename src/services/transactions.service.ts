@@ -7,8 +7,11 @@ export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED";
 export interface TransactionSummary {
   id: string;
   customerId: string;
+  customerName: string | null;
   companyId: string | null;
   reservationId: string | null;
+  reservationUnitName: string | null;
+  reservationStartTime: string | null;
   amount: string;
   type: TransactionType;
   status: TransactionStatus;

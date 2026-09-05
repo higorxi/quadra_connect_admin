@@ -7,10 +7,21 @@ import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@chakra-ui/react";
 import { FiPlus } from "react-icons/fi";
 import { UnitList } from "./components/UnitList";
+import { useSearchParams } from "react-router-dom";
 
 export default function Unidades() {
   const { units, isLoading } = useUnits();
   const { mode, selectedUnit, actions } = useUnitModals();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedUnit = units?.find((unit) => unit.id === searchParams.get("detalhe")) ?? null;
+
+  const closeAll = () => {
+    actions.closeAll();
+    if (searchParams.has("detalhe")) {
+      searchParams.delete("detalhe");
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
 
   return (
     <PageContainer 
@@ -31,15 +42,15 @@ export default function Unidades() {
       </ContentBlock>
 
 
-      <CreateEditUnitModal 
-        isOpen={mode === "create" || mode === "edit"} 
-        onClose={actions.closeAll}
-        unit={selectedUnit}
+      <CreateEditUnitModal
+        isOpen={mode === "create" || mode === "edit" || (!!linkedUnit && mode === null)}
+        onClose={closeAll}
+        unit={mode === "create" ? null : (selectedUnit ?? linkedUnit)}
       />
 
-      <DeleteUnitModal 
-        isOpen={mode === "delete"} 
-        onClose={actions.closeAll}
+      <DeleteUnitModal
+        isOpen={mode === "delete"}
+        onClose={closeAll}
         unit={selectedUnit}
       />
     </PageContainer>

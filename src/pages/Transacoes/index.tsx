@@ -1,32 +1,57 @@
 import { ContentBlock } from "@/components/ContentBlock";
+import { DataTable, type DataTableColumn } from "@/components/DataTable";
 import { DetailItem } from "@/components/DetailItem";
+import { MetricCard } from "@/components/MetricCard";
 import { PageContainer } from "@/components/PageContainer";
 import { BaseModal } from "@/components/ui/BaseModal";
+import { EntityLink } from "@/components/EntityLink";
+import { detailPath } from "@/utils/detail-path";
+import { appPaths } from "@/constants/app-paths";
+import { useCompanyProfile } from "@/hooks/useCompanyProfile";
 import { TransactionsService, type TransactionSummary, type TransactionType } from "@/services/transactions.service";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import { useQuery } from "@tanstack/react-query";
 import {
   Badge,
-  Box,
   Button,
   Center,
   IconButton,
   SimpleGrid,
   Spinner,
-  Table,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FiEye, FiRefreshCw } from "react-icons/fi";
 
 export default function Transacoes() {
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionSummary | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { company } = useCompanyProfile();
 
   const { data: transactions, isLoading, isError, refetch } = useQuery({
     queryKey: ["transactions", "company"],
     queryFn: TransactionsService.getCompanyTransactions,
   });
+
+  const activeTransactionId = selectedTransaction?.id ?? searchParams.get("detalhe") ?? undefined;
+
+  const { data: linkedTransaction, isLoading: isLoadingLinked, isError: isErrorLinked } = useQuery({
+    queryKey: ["transactions", activeTransactionId],
+    queryFn: () => TransactionsService.getTransaction(activeTransactionId as string),
+    enabled: !!activeTransactionId && !selectedTransaction,
+  });
+
+  const activeTransaction = selectedTransaction ?? linkedTransaction ?? null;
+
+  const closeDetails = () => {
+    setSelectedTransaction(null);
+    if (searchParams.has("detalhe")) {
+      searchParams.delete("detalhe");
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
 
   const metrics = useMemo(() => {
     const items = transactions ?? [];
@@ -40,6 +65,86 @@ export default function Transacoes() {
     };
   }, [transactions]);
 
+  const columns: DataTableColumn<TransactionSummary>[] = [
+    {
+      key: "createdAt",
+      header: "Data",
+      cell: (transaction) => (
+        <>
+          <Text fontWeight="semibold" color="navy.600">
+            {formatDateTime(transaction.createdAt)}
+          </Text>
+          <Text fontSize="xs" color="gray.500">
+            atualizada {formatDateTime(transaction.updatedAt)}
+          </Text>
+        </>
+      ),
+    },
+    {
+      key: "type",
+      header: "Tipo",
+      cell: (transaction) => (
+        <Text fontSize="sm" color="gray.700">
+          {formatTransactionType(transaction.type)}
+        </Text>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (transaction) => (
+        <Badge colorPalette={transactionStatusColors[transaction.status]} variant="subtle">
+          {formatTransactionStatus(transaction.status)}
+        </Badge>
+      ),
+    },
+    {
+      key: "reservationId",
+      header: "Reserva",
+      cell: (transaction) =>
+        transaction.reservationId ? (
+          <EntityLink
+            to={detailPath(appPaths.reservas(), transaction.reservationId)}
+            label={formatReservationLabel(transaction)}
+            fallback={transaction.reservationId}
+          />
+        ) : (
+          <Text fontSize="sm" color="gray.700">
+            Sem reserva
+          </Text>
+        ),
+    },
+    {
+      key: "customerId",
+      header: "Cliente",
+      cell: (transaction) => (
+        <Text fontSize="sm" color="gray.700" lineClamp={1}>
+          {transaction.customerName ?? transaction.customerId}
+        </Text>
+      ),
+    },
+    {
+      key: "amount",
+      header: "Valor",
+      cell: (transaction) => <Text fontWeight="semibold">{formatCurrency(transaction.amount)}</Text>,
+    },
+    {
+      key: "actions",
+      header: "Ações",
+      align: "end",
+      cell: (transaction) => (
+        <IconButton
+          aria-label="Ver detalhes da transação"
+          size="sm"
+          variant="ghost"
+          onClick={() => setSelectedTransaction(transaction)}
+        >
+          <FiEye />
+        </IconButton>
+      ),
+    },
+  ];
+
   return (
     <PageContainer
       title="Transações"
@@ -52,126 +157,73 @@ export default function Transacoes() {
     >
       <VStack align="stretch" gap={6}>
         <SimpleGrid columns={{ base: 1, md: 4 }} gap={4}>
-          <Metric label="Total" value={String(metrics.total)} />
-          <Metric label="Pendentes" value={String(metrics.pending)} tone="orange" />
-          <Metric label="Concluídas" value={String(metrics.completed)} tone="green" />
-          <Metric label="Recebido" value={formatCurrency(metrics.revenue)} tone="blue" />
+          <MetricCard label="Total" value={metrics.total} />
+          <MetricCard label="Pendentes" value={metrics.pending} tone="orange" />
+          <MetricCard label="Concluídas" value={metrics.completed} tone="green" />
+          <MetricCard label="Recebido" value={formatCurrency(metrics.revenue)} tone="blue" />
         </SimpleGrid>
 
         <ContentBlock title="Transações da empresa">
-          {isLoading && (
-            <Center h="240px">
-              <VStack gap={4}>
-                <Spinner size="xl" color="brand.500" />
-                <Text color="gray.500">Carregando transações...</Text>
-              </VStack>
-            </Center>
-          )}
-
-          {isError && (
-            <Center h="220px" border="2px dashed" borderColor="red.200" borderRadius="md">
-              <VStack gap={3}>
-                <Text color="red.500" fontWeight="semibold">
-                  Não foi possível carregar as transações.
-                </Text>
-                <Button size="sm" onClick={() => refetch()}>
-                  Tentar novamente
-                </Button>
-              </VStack>
-            </Center>
-          )}
-
-          {!isLoading && !isError && (!transactions || transactions.length === 0) && (
-            <Center h="220px" border="2px dashed" borderColor="gray.200" borderRadius="md">
-              <Text color="gray.400">Nenhuma transação encontrada.</Text>
-            </Center>
-          )}
-
-          {!isLoading && !isError && transactions && transactions.length > 0 && (
-            <Box overflowX="auto" borderRadius="md" border="1px solid" borderColor="gray.100">
-              <Table.Root variant="line" size="sm">
-                <Table.Header bg="gray.50">
-                  <Table.Row>
-                    <Table.ColumnHeader>Data</Table.ColumnHeader>
-                    <Table.ColumnHeader>Tipo</Table.ColumnHeader>
-                    <Table.ColumnHeader>Status</Table.ColumnHeader>
-                    <Table.ColumnHeader>Reserva</Table.ColumnHeader>
-                    <Table.ColumnHeader>Cliente</Table.ColumnHeader>
-                    <Table.ColumnHeader>Valor</Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="end">Ações</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-
-                <Table.Body>
-                  {transactions.map((transaction) => (
-                    <Table.Row key={transaction.id} bg="white" _hover={{ bg: "gray.50" }}>
-                      <Table.Cell>
-                        <Text fontWeight="semibold" color="navy.600">
-                          {formatDateTime(transaction.createdAt)}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500">
-                          atualizada {formatDateTime(transaction.updatedAt)}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontSize="sm" color="gray.700">
-                          {formatTransactionType(transaction.type)}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge colorPalette={transactionStatusColors[transaction.status]} variant="subtle">
-                          {formatTransactionStatus(transaction.status)}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontSize="sm" color="gray.700" lineClamp={1}>
-                          {transaction.reservationId ?? "Sem reserva"}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontSize="sm" color="gray.700" lineClamp={1}>
-                          {transaction.customerId}
-                        </Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text fontWeight="semibold">{formatCurrency(transaction.amount)}</Text>
-                      </Table.Cell>
-                      <Table.Cell textAlign="end">
-                        <IconButton
-                          aria-label="Ver detalhes da transação"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setSelectedTransaction(transaction)}
-                        >
-                          <FiEye />
-                        </IconButton>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
-            </Box>
-          )}
+          <DataTable
+            columns={columns}
+            rows={transactions}
+            rowKey={(transaction) => transaction.id}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={() => refetch()}
+            loadingMessage="Carregando transações..."
+            emptyMessage="Nenhuma transação encontrada."
+            errorMessage="Não foi possível carregar as transações."
+          />
         </ContentBlock>
       </VStack>
 
       <BaseModal
-        isOpen={!!selectedTransaction}
-        onClose={() => setSelectedTransaction(null)}
+        isOpen={!!activeTransactionId}
+        onClose={closeDetails}
         title="Detalhes da transação"
         size="lg"
       >
-        {selectedTransaction && (
+        {isLoadingLinked && (
+          <Center h="180px">
+            <Spinner color="brand.500" />
+          </Center>
+        )}
+
+        {isErrorLinked && !activeTransaction && (
+          <Text color="red.500">Não foi possível carregar esta transação.</Text>
+        )}
+
+        {activeTransaction && (
           <VStack align="stretch" gap={5}>
             <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-              <DetailItem label="Status" value={formatTransactionStatus(selectedTransaction.status)} />
-              <DetailItem label="Tipo" value={formatTransactionType(selectedTransaction.type)} />
-              <DetailItem label="Valor" value={formatCurrency(selectedTransaction.amount)} />
-              <DetailItem label="Criada em" value={formatDateTime(selectedTransaction.createdAt)} />
-              <DetailItem label="Cliente" value={selectedTransaction.customerId} />
-              <DetailItem label="Empresa" value={selectedTransaction.companyId ?? "Sem empresa vinculada"} />
-              <DetailItem label="Reserva" value={selectedTransaction.reservationId ?? "Sem reserva vinculada"} />
-              <DetailItem label="PIX" value={selectedTransaction.pixCode ?? "Sem código PIX"} />
+              <DetailItem label="Status" value={formatTransactionStatus(activeTransaction.status)} />
+              <DetailItem label="Tipo" value={formatTransactionType(activeTransaction.type)} />
+              <DetailItem label="Valor" value={formatCurrency(activeTransaction.amount)} />
+              <DetailItem label="Criada em" value={formatDateTime(activeTransaction.createdAt)} />
+              <DetailItem
+                label="Cliente"
+                value={activeTransaction.customerName ?? activeTransaction.customerId}
+              />
+              <DetailItem
+                label="Empresa"
+                value={company?.name ?? (activeTransaction.companyId ? "Empresa vinculada" : "Sem empresa vinculada")}
+              />
+              <DetailItem
+                label="Reserva"
+                value={
+                  activeTransaction.reservationId ? (
+                    <EntityLink
+                      to={detailPath(appPaths.reservas(), activeTransaction.reservationId)}
+                      label={formatReservationLabel(activeTransaction)}
+                      fallback={activeTransaction.reservationId}
+                    />
+                  ) : (
+                    "Sem reserva vinculada"
+                  )
+                }
+              />
+              <DetailItem label="PIX" value={activeTransaction.pixCode ?? "Sem código PIX"} />
             </SimpleGrid>
           </VStack>
         )}
@@ -207,15 +259,8 @@ function formatTransactionType(type: TransactionType) {
   return transactionTypeLabels[type];
 }
 
-function Metric({ label, value, tone = "gray" }: { label: string; value: string; tone?: string }) {
-  return (
-    <Box bg="white" borderRadius="xl" border="1px solid" borderColor="gray.100" p={5}>
-      <Text fontSize="xs" color="gray.500" fontWeight="bold" textTransform="uppercase">
-        {label}
-      </Text>
-      <Text fontSize="2xl" color={`${tone}.500`} fontWeight="bold">
-        {value}
-      </Text>
-    </Box>
-  );
+function formatReservationLabel(transaction: TransactionSummary) {
+  if (!transaction.reservationUnitName) return transaction.reservationId;
+  if (!transaction.reservationStartTime) return transaction.reservationUnitName;
+  return `${transaction.reservationUnitName} · ${formatDateTime(transaction.reservationStartTime)}`;
 }
