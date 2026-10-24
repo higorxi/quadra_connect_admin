@@ -1,16 +1,14 @@
 import { Box, Image } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-
+import wallpaper1 from "../../../../assets/images/login/login_wallpaper_1.png";
+import wallpaper2 from "../../../../assets/images/login/login_wallpaper_2.png";
+import wallpaper3 from "../../../../assets/images/login/login_wallpaper_3.png";
+import wallpaper4 from "../../../../assets/images/login/login_wallpaper_4.png";
 
 const AuthCarousel = () => {
     const [index, setIndex] = useState(0);
 
-    const images = [
-        'src/assets/images/login/login_wallpaper_1.png',
-        'src/assets/images/login/login_wallpaper_2.png',
-        'src/assets/images/login/login_wallpaper_3.png',
-        'src/assets/images/login/login_wallpaper_4.png',
-    ] as const;
+    const images = [wallpaper1, wallpaper2, wallpaper3, wallpaper4];
 
     useEffect(() => {
         const timer = setInterval(() => {
